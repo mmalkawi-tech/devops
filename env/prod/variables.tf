@@ -13,7 +13,3 @@ variable "resource_group_name" {
 variable "vm_name" {
   type = string
 }
-
-variable "ssh_public_key" {
-  type = string
-}
