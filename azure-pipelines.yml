@@ -87,6 +87,7 @@ stages:
       inputs:
         provider: azurerm
         command: init
+        commandOptions: '-reconfigure'
         workingDirectory: env/prod
         backendServiceArm: moath-sp-new
         backendAzureRmResourceGroupName: rg-tfstate
