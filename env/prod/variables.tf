@@ -13,3 +13,9 @@ variable "resource_group_name" {
 variable "vm_name" {
   type = string
 }
+
+variable "admin_password" {
+  type      = string
+  sensitive = true
+}
+
