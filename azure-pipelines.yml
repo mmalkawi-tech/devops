@@ -38,7 +38,6 @@ stages:
         backendAzureRmStorageAccountName: moathtfstate123
         backendAzureRmContainerName: tfstate
         backendAzureRmKey: dev.terraform.tfstate
-        
 
     # Terraform PLAN (DEV)
     - task: TerraformTaskV4@4
@@ -46,8 +45,11 @@ stages:
       inputs:
         provider: azurerm
         command: plan
+        commandOptions: '-input=false'
         workingDirectory: env/dev
         environmentServiceNameAzureRM: moath-sp-new
+        vars: |
+          ssh_public_key=$(ssh_public_key)
 
     # Terraform APPLY (DEV)
     - task: TerraformTaskV4@4
@@ -55,8 +57,11 @@ stages:
       inputs:
         provider: azurerm
         command: apply
+        commandOptions: '-input=false -auto-approve'
         workingDirectory: env/dev
         environmentServiceNameAzureRM: moath-sp-new
+        vars: |
+          ssh_public_key=$(ssh_public_key)
 
 
 # ==================================================
@@ -101,8 +106,11 @@ stages:
       inputs:
         provider: azurerm
         command: plan
+        commandOptions: '-input=false'
         workingDirectory: env/prod
         environmentServiceNameAzureRM: moath-sp-new
+        vars: |
+          ssh_public_key=$(ssh_public_key)
 
     # Terraform APPLY (PROD)
     - task: TerraformTaskV4@4
@@ -110,5 +118,8 @@ stages:
       inputs:
         provider: azurerm
         command: apply
+        commandOptions: '-input=false -auto-approve'
         workingDirectory: env/prod
         environmentServiceNameAzureRM: moath-sp-new
+        vars: |
+          ssh_public_key=$(ssh_public_key)
