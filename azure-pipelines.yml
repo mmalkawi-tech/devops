@@ -48,6 +48,8 @@ stages:
         commandOptions: '-input=false'
         workingDirectory: env/dev
         environmentServiceNameAzureRM: moath-sp-new
+        vars: |
+          admin_password=$(admin_password)
 
     # Terraform APPLY (DEV)
     - task: TerraformTaskV4@4
@@ -105,6 +107,8 @@ stages:
         commandOptions: '-input=false'
         workingDirectory: env/prod
         environmentServiceNameAzureRM: moath-sp-new
+        vars: |
+          admin_password=$(admin_password)
 
     # Terraform APPLY (PROD)
     - task: TerraformTaskV4@4
