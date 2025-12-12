@@ -5,85 +5,107 @@ variables:
   terraformVersion: '1.6.6'
 
 stages:
+# ==================================================
+# DEV STAGE
+# ==================================================
 - stage: DEV
   displayName: Deploy DEV
   jobs:
   - job: TerraformDEV
+    displayName: Terraform DEV
     pool:
       vmImage: ubuntu-latest
+
     steps:
     - checkout: self
 
+    # Install Terraform
     - task: ms-devlabs.custom-terraform-tasks.custom-terraform-installer-task.TerraformInstaller@1
+      displayName: Install Terraform
       inputs:
         terraformVersion: $(terraformVersion)
 
+    # Terraform INIT (DEV)
     - task: TerraformTaskV4@4
       displayName: Terraform Init DEV
       inputs:
         provider: azurerm
         command: init
         workingDirectory: env/dev
-        backendServiceArm: azurerm-connection
+        backendServiceArm: moath-sp-new
         backendAzureRmResourceGroupName: rg-tfstate
         backendAzureRmStorageAccountName: moathtfstate123
         backendAzureRmContainerName: tfstate
         backendAzureRmKey: dev.terraform.tfstate
 
+    # Terraform PLAN (DEV)
     - task: TerraformTaskV4@4
       displayName: Terraform Plan DEV
       inputs:
         provider: azurerm
         command: plan
         workingDirectory: env/dev
-        environmentServiceNameAzureRM: azurerm-connection
+        environmentServiceNameAzureRM: moath-sp-new
 
+    # Terraform APPLY (DEV)
     - task: TerraformTaskV4@4
       displayName: Terraform Apply DEV
       inputs:
         provider: azurerm
         command: apply
         workingDirectory: env/dev
-        environmentServiceNameAzureRM: azurerm-connection
+        environmentServiceNameAzureRM: moath-sp-new
 
+
+# ==================================================
+# PROD STAGE
+# ==================================================
 - stage: PROD
   displayName: Deploy PROD
   dependsOn: DEV
+  condition: succeeded()
   jobs:
   - job: TerraformPROD
+    displayName: Terraform PROD
     pool:
       vmImage: ubuntu-latest
+
     steps:
     - checkout: self
 
+    # Install Terraform
     - task: ms-devlabs.custom-terraform-tasks.custom-terraform-installer-task.TerraformInstaller@1
+      displayName: Install Terraform
       inputs:
         terraformVersion: $(terraformVersion)
 
+    # Terraform INIT (PROD)
     - task: TerraformTaskV4@4
       displayName: Terraform Init PROD
       inputs:
         provider: azurerm
         command: init
         workingDirectory: env/prod
-        backendServiceArm: azurerm-connection
+        backendServiceArm: moath-sp-new
         backendAzureRmResourceGroupName: rg-tfstate
         backendAzureRmStorageAccountName: moathtfstate123
         backendAzureRmContainerName: tfstate
         backendAzureRmKey: prod.terraform.tfstate
 
+    # Terraform PLAN (PROD)
     - task: TerraformTaskV4@4
       displayName: Terraform Plan PROD
       inputs:
         provider: azurerm
         command: plan
         workingDirectory: env/prod
-        environmentServiceNameAzureRM: azurerm-connection
+        environmentServiceNameAzureRM: moath-sp-new
 
+    # Terraform APPLY (PROD)
     - task: TerraformTaskV4@4
       displayName: Terraform Apply PROD
       inputs:
         provider: azurerm
         command: apply
         workingDirectory: env/prod
-        environmentServiceNameAzureRM: azurerm-connection
+        environmentServiceNameAzureRM: moath-sp-new
