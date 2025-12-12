@@ -5,19 +5,16 @@ variables:
   terraformVersion: '1.6.6'
 
 stages:
-# ======================
-# DEV STAGE
-# ======================
 - stage: DEV
   displayName: Deploy DEV
   jobs:
   - job: TerraformDEV
     pool:
-      vmImage: 'ubuntu-latest'
+      vmImage: ubuntu-latest
     steps:
     - checkout: self
 
-    - task: TerraformInstaller@1
+    - task: ms-devlabs.custom-terraform-tasks.custom-terraform-installer-task.TerraformInstaller@1
       inputs:
         terraformVersion: $(terraformVersion)
 
@@ -49,20 +46,17 @@ stages:
         workingDirectory: env/dev
         environmentServiceNameAzureRM: azurerm-connection
 
-# ======================
-# PROD STAGE
-# ======================
 - stage: PROD
   displayName: Deploy PROD
   dependsOn: DEV
   jobs:
   - job: TerraformPROD
     pool:
-      vmImage: 'ubuntu-latest'
+      vmImage: ubuntu-latest
     steps:
     - checkout: self
 
-    - task: TerraformInstaller@1
+    - task: ms-devlabs.custom-terraform-tasks.custom-terraform-installer-task.TerraformInstaller@1
       inputs:
         terraformVersion: $(terraformVersion)
 
