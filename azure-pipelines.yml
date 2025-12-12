@@ -31,12 +31,14 @@ stages:
       inputs:
         provider: azurerm
         command: init
+        commandOptions: '-reconfigure'
         workingDirectory: env/dev
         backendServiceArm: moath-sp-new
         backendAzureRmResourceGroupName: rg-tfstate
         backendAzureRmStorageAccountName: moathtfstate123
         backendAzureRmContainerName: tfstate
         backendAzureRmKey: dev.terraform.tfstate
+        
 
     # Terraform PLAN (DEV)
     - task: TerraformTaskV4@4
