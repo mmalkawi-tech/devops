@@ -63,62 +63,68 @@ stages:
       env:
         TF_VAR_admin_password: $(admin_password)
 
+
 # ==================================================
-# PROD STAGE
+# PROD STAGE (Manual Approval Required)
 # ==================================================
 - stage: PROD
   displayName: Deploy PROD
   dependsOn: DEV
   condition: succeeded()
+
   jobs:
-  - job: TerraformPROD
+  - deployment: TerraformPROD
     displayName: Terraform PROD
+    environment: prod-approval   # 👈 THIS enables approval
     pool:
       vmImage: ubuntu-latest
 
-    steps:
-    - checkout: self
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - checkout: self
 
-    # Install Terraform
-    - task: ms-devlabs.custom-terraform-tasks.custom-terraform-installer-task.TerraformInstaller@1
-      displayName: Install Terraform
-      inputs:
-        terraformVersion: $(terraformVersion)
+          # Install Terraform
+          - task: ms-devlabs.custom-terraform-tasks.custom-terraform-installer-task.TerraformInstaller@1
+            displayName: Install Terraform
+            inputs:
+              terraformVersion: $(terraformVersion)
 
-    # Terraform INIT (PROD)
-    - task: TerraformTaskV4@4
-      displayName: Terraform Init PROD
-      inputs:
-        provider: azurerm
-        command: init
-        commandOptions: '-reconfigure'
-        workingDirectory: env/prod
-        backendServiceArm: moath-sp-new
-        backendAzureRmResourceGroupName: rg-tfstate
-        backendAzureRmStorageAccountName: moathtfstate123
-        backendAzureRmContainerName: tfstate
-        backendAzureRmKey: prod.terraform.tfstate
+          # Terraform INIT (PROD)
+          - task: TerraformTaskV4@4
+            displayName: Terraform Init PROD
+            inputs:
+              provider: azurerm
+              command: init
+              commandOptions: '-reconfigure'
+              workingDirectory: env/prod
+              backendServiceArm: moath-sp-new
+              backendAzureRmResourceGroupName: rg-tfstate
+              backendAzureRmStorageAccountName: moathtfstate123
+              backendAzureRmContainerName: tfstate
+              backendAzureRmKey: prod.terraform.tfstate
 
-    # Terraform PLAN (PROD)
-    - task: TerraformTaskV4@4
-      displayName: Terraform Plan PROD
-      inputs:
-        provider: azurerm
-        command: plan
-        commandOptions: '-input=false'
-        workingDirectory: env/prod
-        environmentServiceNameAzureRM: moath-sp-new
-      env:
-        TF_VAR_admin_password: $(admin_password)
+          # Terraform PLAN (PROD)
+          - task: TerraformTaskV4@4
+            displayName: Terraform Plan PROD
+            inputs:
+              provider: azurerm
+              command: plan
+              commandOptions: '-input=false'
+              workingDirectory: env/prod
+              environmentServiceNameAzureRM: moath-sp-new
+            env:
+              TF_VAR_admin_password: $(admin_password)
 
-    # Terraform APPLY (PROD)
-    - task: TerraformTaskV4@4
-      displayName: Terraform Apply PROD
-      inputs:
-        provider: azurerm
-        command: apply
-        commandOptions: '-input=false -auto-approve'
-        workingDirectory: env/prod
-        environmentServiceNameAzureRM: moath-sp-new
-      env:
-        TF_VAR_admin_password: $(admin_password)
+          # Terraform APPLY (PROD)
+          - task: TerraformTaskV4@4
+            displayName: Terraform Apply PROD
+            inputs:
+              provider: azurerm
+              command: apply
+              commandOptions: '-input=false -auto-approve'
+              workingDirectory: env/prod
+              environmentServiceNameAzureRM: moath-sp-new
+            env:
+              TF_VAR_admin_password: $(admin_password)
