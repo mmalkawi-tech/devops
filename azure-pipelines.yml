@@ -128,3 +128,53 @@ stages:
               environmentServiceNameAzureRM: moath-sp-new
             env:
               TF_VAR_admin_password: $(admin_password)
+
+
+# ==================================================
+# DESTROY STAGE (MANUAL ONLY)
+# ==================================================
+- stage: DESTROY
+  displayName: Destroy Infrastructure (Manual)
+  dependsOn: []          # 👈 Not tied to DEV or PROD
+  condition: false       # 👈 Prevents auto execution
+
+  jobs:
+  - job: TerraformDestroy
+    displayName: Terraform Destroy DEV
+    pool:
+      vmImage: ubuntu-latest
+
+    steps:
+    - checkout: self
+
+    # Install Terraform
+    - task: ms-devlabs.custom-terraform-tasks.custom-terraform-installer-task.TerraformInstaller@1
+      displayName: Install Terraform
+      inputs:
+        terraformVersion: $(terraformVersion)
+
+    # Terraform INIT (DEV)
+    - task: TerraformTaskV4@4
+      displayName: Terraform Init DEV (Destroy)
+      inputs:
+        provider: azurerm
+        command: init
+        commandOptions: '-reconfigure'
+        workingDirectory: env/dev
+        backendServiceArm: moath-sp-new
+        backendAzureRmResourceGroupName: rg-tfstate
+        backendAzureRmStorageAccountName: moathtfstate123
+        backendAzureRmContainerName: tfstate
+        backendAzureRmKey: dev.terraform.tfstate
+
+    # Terraform DESTROY (DEV)
+    - task: TerraformTaskV4@4
+      displayName: Terraform Destroy DEV
+      inputs:
+        provider: azurerm
+        command: destroy
+        commandOptions: '-auto-approve'
+        workingDirectory: env/dev
+        environmentServiceNameAzureRM: moath-sp-new
+      env:
+        TF_VAR_admin_password: $(admin_password)
